@@ -3,7 +3,7 @@
 import { useEditorStore } from '@/lib/store/editorStore';
 import { getComponentSchema } from '@/lib/registry/component-registry';
 import { PropertySchema } from '@/lib/types/component';
-import { X, Trash2 } from 'lucide-react';
+import { X, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 /**
@@ -14,7 +14,7 @@ import { useState, useEffect } from 'react';
  */
 
 export default function PropertiesPanel() {
-  const { selectedComponentId, getSelectedComponent, updateComponent, removeComponent, selectComponent } = useEditorStore();
+  const { selectedComponentId, getSelectedComponent, updateComponent, removeComponent, selectComponent, moveComponentUp, moveComponentDown, currentPage } = useEditorStore();
   const selectedComponent = getSelectedComponent();
   const [localProps, setLocalProps] = useState<Record<string, any>>({});
 
@@ -92,7 +92,28 @@ export default function PropertiesPanel() {
       </div>
 
       {/* Actions */}
-      <div className="mt-8 pt-6 border-t border-gray-700">
+      <div className="mt-8 pt-6 border-t border-gray-700 space-y-3">
+        {/* Reorder Buttons */}
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => moveComponentUp(selectedComponent.id)}
+            disabled={selectedComponent.order === 0}
+            className="flex items-center justify-center gap-2 glass py-3 rounded-lg hover:bg-neon-blue/20 text-neon-blue transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <ArrowUp size={18} />
+            Move Up
+          </button>
+          <button
+            onClick={() => moveComponentDown(selectedComponent.id)}
+            disabled={!!(currentPage && selectedComponent.order === currentPage.components.length - 1)}
+            className="flex items-center justify-center gap-2 glass py-3 rounded-lg hover:bg-neon-blue/20 text-neon-blue transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <ArrowDown size={18} />
+            Move Down
+          </button>
+        </div>
+
+        {/* Delete Button */}
         <button
           onClick={handleDelete}
           className="w-full flex items-center justify-center gap-2 glass py-3 rounded-lg hover:bg-red-500/20 text-red-400 transition-all"

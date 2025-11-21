@@ -6,3 +6,7 @@ export { default as CTA } from './CTA';
 export { default as Footer } from './Footer';
 export { default as Pricing } from './Pricing';
 export { default as Form } from './Form';
+export { default as Testimonials } from './Testimonials';
+export { default as Stats } from './Stats';
+export { default as Newsletter } from './Newsletter';
+export { default as FAQ } from './FAQ';

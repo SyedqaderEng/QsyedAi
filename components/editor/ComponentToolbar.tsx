@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Sparkles, Code, Download, Upload } from 'lucide-react';
+import { Plus, Sparkles, Code, Download, Upload, FileCode } from 'lucide-react';
 import { useEditorStore } from '@/lib/store/editorStore';
 import { getAllComponents, getComponentsByCategory } from '@/lib/registry/component-registry';
 import { generateLayout } from '@/lib/ai/gemini';
 import { ComponentType } from '@/lib/types/component';
+import { downloadHTML } from '@/lib/export/htmlExporter';
 
 /**
  * Component Toolbar - Add components and AI generation
@@ -157,6 +158,14 @@ export default function ComponentToolbar() {
 
       {/* Export/Import */}
       <div className="space-y-2">
+        <button
+          onClick={() => currentPage && downloadHTML(currentPage)}
+          className="w-full flex items-center gap-2 glass px-4 py-3 rounded-xl hover:shadow-neon-pink transition-all"
+        >
+          <FileCode className="text-neon-pink" size={20} />
+          <span className="font-semibold">Export HTML</span>
+        </button>
+
         <button
           onClick={handleExportJSON}
           className="w-full flex items-center gap-2 glass px-4 py-3 rounded-xl hover:shadow-neon-green transition-all"

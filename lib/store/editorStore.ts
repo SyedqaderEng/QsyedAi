@@ -20,6 +20,8 @@ interface EditorStore {
   addComponent: (component: PageComponent) => void;
   removeComponent: (id: string) => void;
   reorderComponents: (components: PageComponent[]) => void;
+  moveComponentUp: (id: string) => void;
+  moveComponentDown: (id: string) => void;
 
   // Helper to get selected component
   getSelectedComponent: () => PageComponent | null;
@@ -87,6 +89,56 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
 
   reorderComponents: (components) => set((state) => {
     if (!state.currentPage) return state;
+
+    return {
+      currentPage: {
+        ...state.currentPage,
+        components,
+        metadata: {
+          ...state.currentPage.metadata,
+          updatedAt: new Date().toISOString(),
+        },
+      },
+    };
+  }),
+
+  moveComponentUp: (id) => set((state) => {
+    if (!state.currentPage) return state;
+
+    const components = [...state.currentPage.components].sort((a, b) => a.order - b.order);
+    const index = components.findIndex(c => c.id === id);
+
+    if (index <= 0) return state; // Already at top or not found
+
+    // Swap with previous component
+    const temp = components[index - 1].order;
+    components[index - 1].order = components[index].order;
+    components[index].order = temp;
+
+    return {
+      currentPage: {
+        ...state.currentPage,
+        components,
+        metadata: {
+          ...state.currentPage.metadata,
+          updatedAt: new Date().toISOString(),
+        },
+      },
+    };
+  }),
+
+  moveComponentDown: (id) => set((state) => {
+    if (!state.currentPage) return state;
+
+    const components = [...state.currentPage.components].sort((a, b) => a.order - b.order);
+    const index = components.findIndex(c => c.id === id);
+
+    if (index === -1 || index >= components.length - 1) return state; // Not found or already at bottom
+
+    // Swap with next component
+    const temp = components[index + 1].order;
+    components[index + 1].order = components[index].order;
+    components[index].order = temp;
 
     return {
       currentPage: {

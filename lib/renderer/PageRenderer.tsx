@@ -79,14 +79,14 @@ function getComponentByType(type: ComponentType): React.ComponentType<any> | nul
     Footer: Components.Footer,
     Pricing: Components.Pricing,
     Form: Components.Form,
-    // Add placeholders for components not yet implemented
-    Testimonials: () => <div className="p-20 text-center text-gray-400">Testimonials Component (Coming Soon)</div>,
+    Testimonials: Components.Testimonials,
+    Stats: Components.Stats,
+    Newsletter: Components.Newsletter,
+    FAQ: Components.FAQ,
+    // Placeholders for components not yet implemented
     Gallery: () => <div className="p-20 text-center text-gray-400">Gallery Component (Coming Soon)</div>,
-    Stats: () => <div className="p-20 text-center text-gray-400">Stats Component (Coming Soon)</div>,
     Team: () => <div className="p-20 text-center text-gray-400">Team Component (Coming Soon)</div>,
-    FAQ: () => <div className="p-20 text-center text-gray-400">FAQ Component (Coming Soon)</div>,
     LogoCloud: () => <div className="p-20 text-center text-gray-400">LogoCloud Component (Coming Soon)</div>,
-    Newsletter: () => <div className="p-20 text-center text-gray-400">Newsletter Component (Coming Soon)</div>,
   };
 
   return componentMap[type] || null;
