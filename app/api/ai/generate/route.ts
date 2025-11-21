@@ -1,15 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PageComponent } from '@/lib/types/component';
+import { checkRateLimit, getClientIdentifier } from '@/lib/utils/rateLimit';
 
 /**
  * PHASE 3.1: Serverless API Route for Secure Gemini Calls
  *
  * This API route handles AI generation requests securely.
  * The API key is stored server-side and never exposed to the client.
+ * Rate limiting: 10 requests per minute per client
  */
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting check
+    const clientId = getClientIdentifier(request);
+    const rateLimitResult = checkRateLimit(clientId, {
+      maxRequests: 10,
+      windowMs: 60000, // 1 minute
+    });
+
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        {
+          error: 'Rate limit exceeded. Please try again later.',
+          retryAfter: Math.ceil(rateLimitResult.resetInMs / 1000),
+        },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': rateLimitResult.limit.toString(),
+            'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+            'X-RateLimit-Reset': new Date(Date.now() + rateLimitResult.resetInMs).toISOString(),
+            'Retry-After': Math.ceil(rateLimitResult.resetInMs / 1000).toString(),
+          },
+        }
+      );
+    }
+
     const { prompt, existingComponents } = await request.json();
 
     if (!prompt || typeof prompt !== 'string') {

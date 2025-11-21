@@ -16,13 +16,22 @@ export default function ForgotPasswordPage() {
     setError('');
 
     try {
-      // TODO: Integrate with Firebase Auth
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { sendPasswordResetEmail } = await import('firebase/auth');
+      const { auth } = await import('@/lib/firebase/config');
 
-      // Mock success
+      await sendPasswordResetEmail(auth, email);
       setSuccess(true);
-    } catch (err) {
-      setError('Failed to send reset email. Please try again.');
+    } catch (err: any) {
+      const errorCode = err.code;
+      if (errorCode === 'auth/user-not-found') {
+        setError('No account found with this email address.');
+      } else if (errorCode === 'auth/invalid-email') {
+        setError('Invalid email address.');
+      } else if (errorCode === 'auth/too-many-requests') {
+        setError('Too many requests. Please try again later.');
+      } else {
+        setError('Failed to send reset email. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

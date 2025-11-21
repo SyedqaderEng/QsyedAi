@@ -23,10 +23,35 @@ export default function LoginPage() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Store user data
-      const userData = { email: user.email, uid: user.uid };
+      // Check if email is verified
+      if (!user.emailVerified) {
+        // Create session but redirect to verification page
+        const userData = { email: user.email, uid: user.uid, emailVerified: false };
+        await fetch('/api/auth/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(userData),
+        });
+
+        localStorage.setItem('user', JSON.stringify(userData));
+        router.push('/auth/verify-email');
+        return;
+      }
+
+      // Create secure session via API
+      const userData = { email: user.email, uid: user.uid, emailVerified: true };
+      const sessionResponse = await fetch('/api/auth/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+      });
+
+      if (!sessionResponse.ok) {
+        throw new Error('Failed to create session');
+      }
+
+      // Store user data in localStorage for client-side access (non-sensitive)
       localStorage.setItem('user', JSON.stringify(userData));
-      document.cookie = `user=${JSON.stringify(userData)}; path=/; max-age=86400`;
 
       // Redirect to original destination or dashboard
       const urlParams = new URLSearchParams(window.location.search);
@@ -58,10 +83,19 @@ export default function LoginPage() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
+      // Create secure session via API
       const userData = { email: user.email, uid: user.uid, name: user.displayName };
-      localStorage.setItem('user', JSON.stringify(userData));
-      document.cookie = `user=${JSON.stringify(userData)}; path=/; max-age=86400`;
+      const sessionResponse = await fetch('/api/auth/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+      });
 
+      if (!sessionResponse.ok) {
+        throw new Error('Failed to create session');
+      }
+
+      localStorage.setItem('user', JSON.stringify(userData));
       router.push('/dashboard');
     } catch (err: any) {
       setError('Google sign-in failed. Please try again.');
@@ -78,10 +112,19 @@ export default function LoginPage() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
+      // Create secure session via API
       const userData = { email: user.email, uid: user.uid, name: user.displayName };
-      localStorage.setItem('user', JSON.stringify(userData));
-      document.cookie = `user=${JSON.stringify(userData)}; path=/; max-age=86400`;
+      const sessionResponse = await fetch('/api/auth/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+      });
 
+      if (!sessionResponse.ok) {
+        throw new Error('Failed to create session');
+      }
+
+      localStorage.setItem('user', JSON.stringify(userData));
       router.push('/dashboard');
     } catch (err: any) {
       setError('GitHub sign-in failed. Please try again.');

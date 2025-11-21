@@ -4,8 +4,49 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider, GithubAuthProvider } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider, GithubAuthProvider, sendEmailVerification } from 'firebase/auth';
 import { auth } from '@/lib/firebase/config';
+import { AlertCircle } from 'lucide-react';
+
+interface PasswordStrength {
+  score: number; // 0-4
+  label: string;
+  color: string;
+  bgColor: string;
+  feedback: string[];
+}
+
+function validatePasswordStrength(password: string): PasswordStrength {
+  const feedback: string[] = [];
+  let score = 0;
+
+  if (password.length >= 8) score++;
+  else feedback.push('At least 8 characters');
+
+  if (/[a-z]/.test(password)) score++;
+  else feedback.push('One lowercase letter');
+
+  if (/[A-Z]/.test(password)) score++;
+  else feedback.push('One uppercase letter');
+
+  if (/[0-9]/.test(password)) score++;
+  else feedback.push('One number');
+
+  if (/[^a-zA-Z0-9]/.test(password)) score++;
+  else feedback.push('One special character (!@#$%^&*)');
+
+  const labels = ['Very Weak', 'Weak', 'Fair', 'Strong', 'Very Strong'];
+  const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#10b981'];
+  const bgColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-500', 'bg-emerald-500'];
+
+  return {
+    score,
+    label: labels[score - 1] || 'Very Weak',
+    color: colors[score - 1] || '#ef4444',
+    bgColor: bgColors[score - 1] || 'bg-red-500',
+    feedback,
+  };
+}
 
 export default function SignupPage() {
   const router = useRouter();
@@ -17,6 +58,14 @@ export default function SignupPage() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>(
+    validatePasswordStrength('')
+  );
+
+  const handlePasswordChange = (password: string) => {
+    setFormData({ ...formData, password });
+    setPasswordStrength(validatePasswordStrength(password));
+  };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,8 +79,9 @@ export default function SignupPage() {
       return;
     }
 
-    if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters');
+    // Strong password validation
+    if (passwordStrength.score < 4) {
+      setError(`Password too weak. Requirements: ${passwordStrength.feedback.join(', ')}`);
       setLoading(false);
       return;
     }
@@ -43,11 +93,25 @@ export default function SignupPage() {
       // Update profile with name
       await updateProfile(user, { displayName: formData.name });
 
-      const userData = { email: user.email, uid: user.uid, name: formData.name };
-      localStorage.setItem('user', JSON.stringify(userData));
-      document.cookie = `user=${JSON.stringify(userData)}; path=/; max-age=86400`;
+      // Send email verification
+      await sendEmailVerification(user);
 
-      router.push('/dashboard');
+      // Create secure session via API
+      const userData = { email: user.email, uid: user.uid, name: formData.name, emailVerified: false };
+      const sessionResponse = await fetch('/api/auth/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+      });
+
+      if (!sessionResponse.ok) {
+        throw new Error('Failed to create session');
+      }
+
+      localStorage.setItem('user', JSON.stringify(userData));
+
+      // Redirect to verification reminder page
+      router.push('/auth/verify-email');
     } catch (err: any) {
       const errorCode = err.code;
       if (errorCode === 'auth/email-already-in-use') {
@@ -72,10 +136,19 @@ export default function SignupPage() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
+      // Create secure session via API
       const userData = { email: user.email, uid: user.uid, name: user.displayName };
-      localStorage.setItem('user', JSON.stringify(userData));
-      document.cookie = `user=${JSON.stringify(userData)}; path=/; max-age=86400`;
+      const sessionResponse = await fetch('/api/auth/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+      });
 
+      if (!sessionResponse.ok) {
+        throw new Error('Failed to create session');
+      }
+
+      localStorage.setItem('user', JSON.stringify(userData));
       router.push('/dashboard');
     } catch (err: any) {
       setError('Google sign-up failed. Please try again.');
@@ -92,10 +165,19 @@ export default function SignupPage() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
+      // Create secure session via API
       const userData = { email: user.email, uid: user.uid, name: user.displayName };
-      localStorage.setItem('user', JSON.stringify(userData));
-      document.cookie = `user=${JSON.stringify(userData)}; path=/; max-age=86400`;
+      const sessionResponse = await fetch('/api/auth/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+      });
 
+      if (!sessionResponse.ok) {
+        throw new Error('Failed to create session');
+      }
+
+      localStorage.setItem('user', JSON.stringify(userData));
       router.push('/dashboard');
     } catch (err: any) {
       setError('GitHub sign-up failed. Please try again.');
@@ -170,13 +252,49 @@ export default function SignupPage() {
               <input
                 type="password"
                 value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                onChange={(e) => handlePasswordChange(e.target.value)}
                 required
                 minLength={8}
                 className="w-full glass px-4 py-3 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-neon-blue transition-all outline-none"
                 placeholder="••••••••"
               />
-              <p className="text-xs text-gray-500 mt-1">Must be at least 8 characters</p>
+
+              {/* Password Strength Indicator */}
+              {formData.password && (
+                <div className="mt-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-gray-400">Password Strength:</span>
+                    <span className="text-xs font-semibold" style={{ color: passwordStrength.color }}>
+                      {passwordStrength.label}
+                    </span>
+                  </div>
+                  <div className="flex gap-1 mb-2">
+                    {[1, 2, 3, 4, 5].map((level) => (
+                      <div
+                        key={level}
+                        className={`h-1 flex-1 rounded-full transition-all ${
+                          level <= passwordStrength.score
+                            ? passwordStrength.bgColor
+                            : 'bg-gray-700'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  {passwordStrength.feedback.length > 0 && (
+                    <div className="flex items-start gap-2 p-2 glass rounded-lg">
+                      <AlertCircle className="w-4 h-4 text-orange-400 flex-shrink-0 mt-0.5" />
+                      <div className="text-xs text-gray-400">
+                        <span className="font-semibold text-gray-300">Requirements:</span>
+                        <ul className="mt-1 space-y-0.5">
+                          {passwordStrength.feedback.map((req, idx) => (
+                            <li key={idx}>• {req}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div>

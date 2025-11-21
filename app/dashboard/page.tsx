@@ -4,70 +4,116 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Plus, FolderOpen, Trash2, Settings, LogOut, Code, Eye } from 'lucide-react';
-
-interface Project {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  thumbnail?: string;
-  createdAt: string;
-  updatedAt: string;
-  componentsCount: number;
-}
+import { Plus, FolderOpen, Trash2, Settings, LogOut, Code, Eye, AlertCircle } from 'lucide-react';
+import {
+  getUserProjects,
+  createProject,
+  deleteProject as deleteProjectFromDb,
+  migrateLocalStorageProjects,
+  Project,
+} from '@/lib/firebase/projects';
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [user, setUser] = useState<{ email: string; name?: string } | null>(null);
+  const [user, setUser] = useState<{ email: string; name?: string; uid?: string } | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    // Load user data
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
+    const initDashboard = async () => {
+      try {
+        // Load user data
+        const userData = localStorage.getItem('user');
+        if (!userData) {
+          router.push('/auth/login');
+          return;
+        }
 
-    // Load projects from localStorage (TODO: Replace with Firestore)
-    const savedProjects = localStorage.getItem('projects');
-    if (savedProjects) {
-      setProjects(JSON.parse(savedProjects));
-    }
-    setLoading(false);
-  }, []);
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
 
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    document.cookie = 'user=; path=/; max-age=0';
-    router.push('/auth/login');
-  };
+        if (!parsedUser.uid) {
+          setError('User ID not found. Please log in again.');
+          setLoading(false);
+          return;
+        }
 
-  const handleNewProject = () => {
-    const newProject: Project = {
-      id: `project-${Date.now()}`,
-      name: 'Untitled Project',
-      slug: `untitled-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      componentsCount: 0,
+        // Migrate localStorage projects if any exist
+        await migrateLocalStorageProjects(parsedUser.uid);
+
+        // Load projects from Firestore
+        const userProjects = await getUserProjects(parsedUser.uid);
+        setProjects(userProjects);
+      } catch (err) {
+        console.error('Error loading dashboard:', err);
+        setError('Failed to load projects. Please try again.');
+      } finally {
+        setLoading(false);
+      }
     };
 
-    const updatedProjects = [...projects, newProject];
-    setProjects(updatedProjects);
-    localStorage.setItem('projects', JSON.stringify(updatedProjects));
+    initDashboard();
+  }, [router]);
 
-    // Navigate to editor
-    router.push(`/editor?project=${newProject.id}`);
+  const handleLogout = async () => {
+    try {
+      // Clear server-side session
+      await fetch('/api/auth/session', { method: 'DELETE' });
+
+      // Clear client-side data
+      localStorage.removeItem('user');
+      router.push('/auth/login');
+    } catch (err) {
+      console.error('Logout error:', err);
+      // Still redirect even if API call fails
+      localStorage.removeItem('user');
+      router.push('/auth/login');
+    }
   };
 
-  const handleDeleteProject = (projectId: string) => {
-    if (!confirm('Are you sure you want to delete this project?')) return;
+  const handleNewProject = async () => {
+    if (!user?.uid) {
+      setError('User not authenticated');
+      return;
+    }
 
-    const updatedProjects = projects.filter(p => p.id !== projectId);
-    setProjects(updatedProjects);
-    localStorage.setItem('projects', JSON.stringify(updatedProjects));
+    setLoading(true);
+    try {
+      const projectId = await createProject(user.uid, {
+        name: 'Untitled Project',
+        slug: `untitled-${Date.now()}`,
+        componentsCount: 0,
+      });
+
+      // Refresh projects list
+      const userProjects = await getUserProjects(user.uid);
+      setProjects(userProjects);
+
+      // Navigate to editor
+      router.push(`/editor?project=${projectId}`);
+    } catch (err) {
+      console.error('Error creating project:', err);
+      setError('Failed to create project. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteProject = async (projectId: string) => {
+    if (!window.confirm('Are you sure you want to delete this project?')) return;
+    if (!user?.uid) return;
+
+    try {
+      await deleteProjectFromDb(projectId);
+
+      // Refresh projects list
+      const userProjects = await getUserProjects(user.uid);
+      setProjects(userProjects);
+    } catch (err) {
+      console.error('Error deleting project:', err);
+      setError('Failed to delete project. Please try again.');
+    }
   };
 
   if (loading) {
@@ -117,6 +163,24 @@ export default function DashboardPage() {
           </div>
         </div>
       </nav>
+
+      {/* Error Banner */}
+      {error && (
+        <div className="relative z-10 container mx-auto px-6 pt-6">
+          <div className="glass p-4 rounded-lg border border-red-500/50 bg-red-500/10 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-red-400 text-sm">{error}</p>
+            </div>
+            <button
+              onClick={() => setError('')}
+              className="text-red-400 hover:text-red-300 transition-colors"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
       <div className="relative z-10 container mx-auto px-6 py-12">
