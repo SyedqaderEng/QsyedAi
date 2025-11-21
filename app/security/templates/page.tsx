@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileTemplate, Plus, Copy, Star, Download } from 'lucide-react';
+import { FileText, Plus, Copy, Star, Download } from 'lucide-react';
 
 export default function TemplatesPage() {
   const [templates] = useState([
@@ -19,7 +19,7 @@ export default function TemplatesPage() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-8">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <FileTemplate className="w-8 h-8 text-purple-400" />
+              <FileText className="w-8 h-8 text-purple-400" />
               <h1 className="text-3xl font-bold">Templates</h1>
             </div>
             <p className="text-gray-400">Pre-built security configurations</p>
