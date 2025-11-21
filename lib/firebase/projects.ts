@@ -35,8 +35,9 @@ export async function getUserProjects(userId: string): Promise<Project[]> {
     const projectsRef = collection(db, 'projects');
     const q = query(
       projectsRef,
-      where('userId', '==', userId),
-      orderBy('updatedAt', 'desc')
+      where('userId', '==', userId)
+      // Note: orderBy removed to avoid composite index requirement
+      // Projects will be sorted client-side if needed
     );
 
     const querySnapshot = await getDocs(q);
@@ -57,6 +58,9 @@ export async function getUserProjects(userId: string): Promise<Project[]> {
         pages: data.pages || [],
       });
     });
+
+    // Sort by updatedAt descending client-side
+    projects.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
     return projects;
   } catch (error) {

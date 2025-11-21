@@ -26,7 +26,12 @@ export default function LoginPage() {
       // Check if email is verified
       if (!user.emailVerified) {
         // Create session but redirect to verification page
-        const userData = { email: user.email, uid: user.uid, emailVerified: false };
+        const userData = {
+          email: user.email,
+          uid: user.uid,
+          name: user.displayName || user.email?.split('@')[0],
+          emailVerified: false
+        };
         await fetch('/api/auth/session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -39,7 +44,12 @@ export default function LoginPage() {
       }
 
       // Create secure session via API
-      const userData = { email: user.email, uid: user.uid, emailVerified: true };
+      const userData = {
+        email: user.email,
+        uid: user.uid,
+        name: user.displayName || user.email?.split('@')[0],
+        emailVerified: true
+      };
       const sessionResponse = await fetch('/api/auth/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
