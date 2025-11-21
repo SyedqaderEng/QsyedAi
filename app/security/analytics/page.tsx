@@ -67,7 +67,7 @@ export default function AnalyticsPage() {
   ];
 
   const teamPerformance = [
-    { name: 'John Doe', resolved: 45, avgTime: 2.1, scansTrigger ed: 23 },
+    { name: 'John Doe', resolved: 45, avgTime: 2.1, scansTriggered: 23 },
     { name: 'Jane Smith', resolved: 38, avgTime: 2.8, scansTriggered: 19 },
     { name: 'Bob Wilson', resolved: 32, avgTime: 3.5, scansTriggered: 15 },
     { name: 'Alice Johnson', resolved: 28, avgTime: 2.3, scansTriggered: 21 },
