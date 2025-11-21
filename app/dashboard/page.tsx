@@ -94,6 +94,9 @@ export default function DashboardPage() {
           </Link>
 
           <div className="flex items-center gap-4">
+            <Link href="/security" className="text-gray-300 hover:text-white transition-colors">
+              Security
+            </Link>
             <span className="text-gray-300">
               {user?.name || user?.email}
             </span>
