@@ -14,7 +14,7 @@ export const samplePage: PageState = {
       type: 'Navbar',
       order: 0,
       props: {
-        logo: 'Aikido Builder',
+        logo: 'Syed.AI',
         menuItems: 'Features,Pricing,About,Contact',
         ctaText: 'Get Started',
         ctaUrl: '#hero',
@@ -129,7 +129,7 @@ export const samplePage: PageState = {
       type: 'Footer',
       order: 5,
       props: {
-        companyName: 'Aikido Builder',
+        companyName: 'Syed.AI',
         description: 'Building the future of web design, one component at a time.',
         columns: [
           {
@@ -150,7 +150,7 @@ export const samplePage: PageState = {
     },
   ],
   metadata: {
-    title: 'Aikido Visual Builder - AI-Powered Website Builder',
+    title: 'Syed.AI Visual Builder - AI-Powered Website Builder',
     description: 'Build stunning websites with AI-powered visual editor',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),

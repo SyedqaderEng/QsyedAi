@@ -70,7 +70,7 @@ export default function SettingsPage() {
             Back to Dashboard
           </Link>
           <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-neon-blue to-neon-purple bg-clip-text text-transparent">
-            Aikido Builder
+            Syed.AI
           </Link>
         </div>
       </nav>

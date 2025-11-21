@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Aikido Visual Builder - AI-Powered Website Builder",
+  title: "Syed.AI Visual Builder - AI-Powered Website Builder",
   description: "Build stunning websites with AI-powered visual editor featuring glassmorphism design",
 };
 

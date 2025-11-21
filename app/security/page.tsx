@@ -93,7 +93,7 @@ export default function SecurityDashboard() {
       <nav className="relative z-10 glass-strong border-b border-gray-700">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-neon-blue to-neon-purple bg-clip-text text-transparent">
-            Aikido Security
+            Syed.AI Security
           </Link>
 
           <div className="flex items-center gap-6">

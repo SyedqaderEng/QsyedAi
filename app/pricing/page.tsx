@@ -10,7 +10,7 @@ export default function PricingPage() {
       name: 'Free',
       price: '$0',
       period: 'forever',
-      description: 'Perfect for trying out Aikido Builder',
+      description: 'Perfect for trying out Syed.AI',
       features: [
         '1 project',
         'Basic components',
@@ -80,7 +80,7 @@ export default function PricingPage() {
       <nav className="relative z-10 glass-strong">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-neon-blue to-neon-purple bg-clip-text text-transparent">
-            Aikido Builder
+            Syed.AI
           </Link>
 
           <div className="flex items-center gap-4">
@@ -223,7 +223,7 @@ export default function PricingPage() {
             <div className="glass p-6 rounded-xl">
               <h3 className="text-xl font-bold text-white mb-2">Is there a money-back guarantee?</h3>
               <p className="text-gray-400">
-                Yes! We offer a 30-day money-back guarantee. If you're not satisfied with Aikido Builder, we'll refund your payment in full.
+                Yes! We offer a 30-day money-back guarantee. If you're not satisfied with Syed.AI, we'll refund your payment in full.
               </p>
             </div>
 
@@ -241,7 +241,7 @@ export default function PricingPage() {
       <footer className="relative z-10 glass-strong mt-20">
         <div className="container mx-auto px-6 py-8 text-center">
           <p className="text-gray-400">
-            © 2025 Aikido Builder. All rights reserved.
+            © 2025 Syed.AI. All rights reserved.
           </p>
         </div>
       </footer>

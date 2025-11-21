@@ -57,7 +57,7 @@ export default function LoginPage() {
             <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-neon-blue to-neon-purple bg-clip-text text-transparent">
               Welcome Back
             </h1>
-            <p className="text-gray-400">Sign in to continue to Aikido Builder</p>
+            <p className="text-gray-400">Sign in to continue to Syed.AI</p>
           </div>
 
           {/* Error message */}

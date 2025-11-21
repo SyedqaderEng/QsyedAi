@@ -90,7 +90,7 @@ export default function DashboardPage() {
       <nav className="relative z-10 glass-strong">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-neon-blue to-neon-purple bg-clip-text text-transparent">
-            Aikido Builder
+            Syed.AI
           </Link>
 
           <div className="flex items-center gap-4">

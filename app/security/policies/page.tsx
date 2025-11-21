@@ -188,7 +188,7 @@ export default function PoliciesPage() {
             Back to Security
           </Link>
           <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-neon-blue to-neon-purple bg-clip-text text-transparent">
-            Aikido Security
+            Syed.AI Security
           </Link>
         </div>
       </nav>

@@ -1,6 +1,6 @@
-# Aikido Visual Builder
+# Syed.AI Visual Builder
 
-A stunning, AI-powered visual website builder with glassmorphism design, inspired by modern no-code platforms like Webflow, Bubble, and Aikido.dev.
+A stunning, AI-powered visual website builder with glassmorphism design, inspired by modern no-code platforms like Webflow, Bubble, and Syed.AI.dev.
 
 ## Features
 
@@ -214,7 +214,7 @@ MIT
 ## Credits
 
 Built with inspiration from:
-- Aikido.dev
+- Syed.AI.dev
 - Webflow
 - Bubble
 - Framer
