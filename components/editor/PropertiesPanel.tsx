@@ -3,7 +3,7 @@
 import { useEditorStore } from '@/lib/store/editorStore';
 import { getComponentSchema } from '@/lib/registry/component-registry';
 import { PropertySchema } from '@/lib/types/component';
-import { X, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
+import { X, Trash2, ArrowUp, ArrowDown, Copy } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 /**
@@ -14,7 +14,7 @@ import { useState, useEffect } from 'react';
  */
 
 export default function PropertiesPanel() {
-  const { selectedComponentId, getSelectedComponent, updateComponent, removeComponent, selectComponent, moveComponentUp, moveComponentDown, currentPage } = useEditorStore();
+  const { selectedComponentId, getSelectedComponent, updateComponent, removeComponent, duplicateComponent, selectComponent, moveComponentUp, moveComponentDown, currentPage } = useEditorStore();
   const selectedComponent = getSelectedComponent();
   const [localProps, setLocalProps] = useState<Record<string, any>>({});
 
@@ -112,6 +112,15 @@ export default function PropertiesPanel() {
             Move Down
           </button>
         </div>
+
+        {/* Duplicate Button */}
+        <button
+          onClick={() => duplicateComponent(selectedComponent.id)}
+          className="w-full flex items-center justify-center gap-2 glass py-3 rounded-lg hover:bg-neon-green/20 text-neon-green transition-all"
+        >
+          <Copy size={18} />
+          Duplicate Component
+        </button>
 
         {/* Delete Button */}
         <button

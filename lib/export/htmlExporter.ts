@@ -112,6 +112,12 @@ function generateComponentHTML(component: PageComponent): string {
       return generateNewsletterHTML(props);
     case 'FAQ':
       return generateFAQHTML(props);
+    case 'Gallery':
+      return generateGalleryHTML(props);
+    case 'Team':
+      return generateTeamHTML(props);
+    case 'LogoCloud':
+      return generateLogoCloudHTML(props);
     default:
       return `<!-- ${type} component not yet supported in export -->`;
   }
@@ -420,6 +426,91 @@ function generateFAQHTML(props: any): string {
       <div class="glass rounded-xl p-6">
         <h3 class="font-semibold text-white text-lg mb-3">${faq.question}</h3>
         <p class="text-gray-400">${faq.answer}</p>
+      </div>
+      `).join('')}
+    </div>
+  </div>
+</section>`;
+}
+
+function generateGalleryHTML(props: any): string {
+  const images = props.images || [];
+  const gridColsMap: Record<string, string> = {
+    '2': 'md:grid-cols-2',
+    '3': 'md:grid-cols-3',
+    '4': 'md:grid-cols-4',
+    '5': 'md:grid-cols-5',
+  };
+  const gridCols = gridColsMap[props.columns || '3'];
+
+  return `
+<section class="py-20 px-6">
+  <div class="container mx-auto">
+    ${props.title ? `<h2 class="text-4xl md:text-5xl font-bold mb-12 text-center bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">${props.title}</h2>` : ''}
+    <div class="grid ${gridCols} gap-4">
+      ${images.map((image: string, idx: number) => `
+      <div class="relative overflow-hidden rounded-xl glass group cursor-pointer aspect-square">
+        <img src="${image}" alt="Gallery item ${idx + 1}" class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+          <span class="text-white font-semibold">View Image</span>
+        </div>
+      </div>
+      `).join('')}
+    </div>
+  </div>
+</section>`;
+}
+
+function generateTeamHTML(props: any): string {
+  const members = props.members || [];
+  const gridColsMap: Record<string, string> = {
+    '2': 'md:grid-cols-2',
+    '3': 'md:grid-cols-3',
+    '4': 'md:grid-cols-4',
+    '5': 'md:grid-cols-5',
+  };
+  const gridCols = gridColsMap[props.columns || '4'];
+
+  return `
+<section class="py-20 px-6">
+  <div class="container mx-auto">
+    ${props.title ? `
+    <div class="text-center mb-16">
+      <h2 class="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">${props.title}</h2>
+      ${props.subtitle ? `<p class="text-xl text-gray-400">${props.subtitle}</p>` : ''}
+    </div>
+    ` : ''}
+    <div class="grid ${gridCols} gap-8">
+      ${members.map((member: any) => `
+      <div class="glass p-6 rounded-2xl hover:glass-strong transition-all text-center">
+        ${member.avatar ? `
+        <img src="${member.avatar}" alt="${member.name}" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover ring-2 ring-cyan-400">
+        ` : `
+        <div class="w-24 h-24 rounded-full mx-auto mb-4 bg-gradient-to-r from-cyan-400 to-purple-500 flex items-center justify-center text-3xl font-bold text-white">
+          ${member.name.charAt(0)}
+        </div>
+        `}
+        <h3 class="text-xl font-bold text-white mb-1">${member.name}</h3>
+        <p class="text-cyan-400 text-sm mb-3">${member.role}</p>
+        ${member.bio ? `<p class="text-gray-400 text-sm mb-4">${member.bio}</p>` : ''}
+      </div>
+      `).join('')}
+    </div>
+  </div>
+</section>`;
+}
+
+function generateLogoCloudHTML(props: any): string {
+  const logos = props.logos || [];
+
+  return `
+<section class="py-20 px-6">
+  <div class="container mx-auto">
+    ${props.title ? `<h2 class="text-3xl md:text-4xl font-bold mb-12 text-center bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">${props.title}</h2>` : ''}
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 items-center">
+      ${logos.map((logo: any) => `
+      <div class="flex items-center justify-center p-6 glass rounded-xl">
+        <img src="${logo.url}" alt="${logo.name}" class="w-full h-auto max-h-12 object-contain ${props.grayscale ? 'grayscale opacity-60 hover:grayscale-0 hover:opacity-100' : 'opacity-80 hover:opacity-100'} transition-all duration-300">
       </div>
       `).join('')}
     </div>

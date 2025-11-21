@@ -10,3 +10,6 @@ export { default as Testimonials } from './Testimonials';
 export { default as Stats } from './Stats';
 export { default as Newsletter } from './Newsletter';
 export { default as FAQ } from './FAQ';
+export { default as Gallery } from './Gallery';
+export { default as Team } from './Team';
+export { default as LogoCloud } from './LogoCloud';

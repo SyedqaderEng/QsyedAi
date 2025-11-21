@@ -19,6 +19,7 @@ interface EditorStore {
   updateComponent: (id: string, props: Partial<PageComponent['props']>) => void;
   addComponent: (component: PageComponent) => void;
   removeComponent: (id: string) => void;
+  duplicateComponent: (id: string) => void;
   reorderComponents: (components: PageComponent[]) => void;
   moveComponentUp: (id: string) => void;
   moveComponentDown: (id: string) => void;
@@ -84,6 +85,40 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
         },
       },
       selectedComponentId: state.selectedComponentId === id ? null : state.selectedComponentId,
+    };
+  }),
+
+  duplicateComponent: (id) => set((state) => {
+    if (!state.currentPage) return state;
+
+    const componentToDuplicate = state.currentPage.components.find((c) => c.id === id);
+    if (!componentToDuplicate) return state;
+
+    // Create a duplicate with new ID and incremented order
+    const newComponent: PageComponent = {
+      ...componentToDuplicate,
+      id: `${componentToDuplicate.type.toLowerCase()}-${Date.now()}`,
+      order: componentToDuplicate.order + 1,
+    };
+
+    // Insert the duplicate right after the original
+    const updatedComponents = state.currentPage.components.map((comp) =>
+      comp.order > componentToDuplicate.order
+        ? { ...comp, order: comp.order + 1 }
+        : comp
+    );
+    updatedComponents.push(newComponent);
+
+    return {
+      currentPage: {
+        ...state.currentPage,
+        components: updatedComponents,
+        metadata: {
+          ...state.currentPage.metadata,
+          updatedAt: new Date().toISOString(),
+        },
+      },
+      selectedComponentId: newComponent.id,
     };
   }),
 
