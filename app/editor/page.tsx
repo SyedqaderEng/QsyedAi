@@ -6,8 +6,12 @@ import PageRenderer from '@/lib/renderer/PageRenderer';
 import PropertiesPanel from '@/components/editor/PropertiesPanel';
 import ComponentToolbar from '@/components/editor/ComponentToolbar';
 import { samplePage } from '@/lib/utils/sampleData';
-import { ArrowLeft, Eye, Code, Save } from 'lucide-react';
+import { ArrowLeft, Eye, Code, Save, Smartphone, Tablet, Monitor } from 'lucide-react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+
+// Dynamically import Monaco to avoid SSR issues
+const CodeEditor = dynamic(() => import('@/components/editor/CodeEditor'), { ssr: false });
 
 /**
  * PHASE 2.2: Visual Editor Page
@@ -28,7 +32,8 @@ export default function EditorPage() {
     selectComponent,
   } = useEditorStore();
 
-  const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
+  const [viewMode, setViewMode] = useState<'edit' | 'preview' | 'code'>('edit');
+  const [deviceMode, setDeviceMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
 
   useEffect(() => {
     // Load sample page on mount
@@ -69,25 +74,77 @@ export default function EditorPage() {
             <div className="flex glass rounded-lg p-1">
               <button
                 onClick={() => setViewMode('edit')}
-                className={`px-4 py-2 rounded-md transition-all ${
+                className={`px-3 py-2 rounded-md transition-all flex items-center gap-1 ${
                   viewMode === 'edit'
                     ? 'bg-neon-blue text-white'
                     : 'text-gray-400 hover:text-white'
                 }`}
+                title="Visual Editor"
+              >
+                <Eye size={18} />
+              </button>
+              <button
+                onClick={() => setViewMode('code')}
+                className={`px-3 py-2 rounded-md transition-all flex items-center gap-1 ${
+                  viewMode === 'code'
+                    ? 'bg-neon-blue text-white'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+                title="Code Editor"
               >
                 <Code size={18} />
               </button>
               <button
                 onClick={() => setViewMode('preview')}
-                className={`px-4 py-2 rounded-md transition-all ${
+                className={`px-3 py-2 rounded-md transition-all flex items-center gap-1 ${
                   viewMode === 'preview'
                     ? 'bg-neon-blue text-white'
                     : 'text-gray-400 hover:text-white'
                 }`}
+                title="Preview Mode"
               >
-                <Eye size={18} />
+                <Monitor size={18} />
               </button>
             </div>
+
+            {/* Device Preview Toggle */}
+            {viewMode === 'preview' && (
+              <div className="flex glass rounded-lg p-1">
+                <button
+                  onClick={() => setDeviceMode('desktop')}
+                  className={`px-3 py-2 rounded-md transition-all ${
+                    deviceMode === 'desktop'
+                      ? 'bg-neon-purple text-white'
+                      : 'text-gray-400 hover:text-white'
+                  }`}
+                  title="Desktop View"
+                >
+                  <Monitor size={18} />
+                </button>
+                <button
+                  onClick={() => setDeviceMode('tablet')}
+                  className={`px-3 py-2 rounded-md transition-all ${
+                    deviceMode === 'tablet'
+                      ? 'bg-neon-purple text-white'
+                      : 'text-gray-400 hover:text-white'
+                  }`}
+                  title="Tablet View"
+                >
+                  <Tablet size={18} />
+                </button>
+                <button
+                  onClick={() => setDeviceMode('mobile')}
+                  className={`px-3 py-2 rounded-md transition-all ${
+                    deviceMode === 'mobile'
+                      ? 'bg-neon-purple text-white'
+                      : 'text-gray-400 hover:text-white'
+                  }`}
+                  title="Mobile View"
+                >
+                  <Smartphone size={18} />
+                </button>
+              </div>
+            )}
 
             <button
               onClick={() => {
@@ -115,7 +172,7 @@ export default function EditorPage() {
               </div>
             </div>
 
-            {/* Center - Canvas/Preview */}
+            {/* Center - Canvas/Preview/Code */}
             <div className="col-span-6">
               <div className="glass-strong rounded-2xl overflow-hidden min-h-screen">
                 {viewMode === 'edit' && (
@@ -126,20 +183,45 @@ export default function EditorPage() {
                   </div>
                 )}
 
-                <div
-                  className={`${viewMode === 'preview' ? '' : 'cursor-pointer'}`}
-                  onClick={() => viewMode === 'edit' && selectComponent(null)}
-                >
-                  <PageRenderer
-                    components={currentPage.components}
-                    onComponentClick={(id) => {
-                      if (viewMode === 'edit') {
-                        selectComponent(id);
-                      }
-                    }}
-                    selectedId={viewMode === 'edit' ? selectedComponentId || undefined : undefined}
-                  />
-                </div>
+                {viewMode === 'code' && (
+                  <div className="bg-neon-purple/10 p-4 border-b border-gray-700 text-center">
+                    <p className="text-sm text-gray-300">
+                      View and edit your page JSON
+                    </p>
+                  </div>
+                )}
+
+                {viewMode === 'code' ? (
+                  <CodeEditor />
+                ) : (
+                  <div
+                    className={`${viewMode === 'preview' ? 'flex justify-center p-6' : ''}`}
+                  >
+                    {/* Device Preview Container */}
+                    <div
+                      className={`${
+                        viewMode === 'preview'
+                          ? deviceMode === 'mobile'
+                            ? 'w-[375px] border-8 border-gray-800 rounded-[2.5rem] shadow-2xl'
+                            : deviceMode === 'tablet'
+                            ? 'w-[768px] border-8 border-gray-800 rounded-[1.5rem] shadow-2xl'
+                            : 'w-full'
+                          : 'w-full'
+                      } ${viewMode === 'preview' ? '' : 'cursor-pointer'} transition-all duration-300 overflow-hidden bg-white`}
+                      onClick={() => viewMode === 'edit' && selectComponent(null)}
+                    >
+                      <PageRenderer
+                        components={currentPage.components}
+                        onComponentClick={(id) => {
+                          if (viewMode === 'edit') {
+                            selectComponent(id);
+                          }
+                        }}
+                        selectedId={viewMode === 'edit' ? selectedComponentId || undefined : undefined}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
